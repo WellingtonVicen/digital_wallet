@@ -1,6 +1,9 @@
 ﻿using DigitalWalletAPI.Application.Commands.User;
+using DigitalWalletAPI.Application.Commands.User.Authentication;
 using DigitalWalletAPI.Application.DTOs.User;
+using DigitalWalletAPI.Application.DTOs.User.Authentication;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalWalletAPI.Controllers
@@ -16,12 +19,36 @@ namespace DigitalWalletAPI.Controllers
             _mediator = mediator;
         }
 
+        // <summary>
+        /// Autentica um usuário e retorna o token JWT.
+        /// </summary>
+        /// <param name="request">Dados de autenticação.</param>
+        /// <returns>Token JWT.</returns>
+        [HttpPost("authenticate")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Authenticate([FromBody] AuthenticateUserRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var command = new AuthenticateCommand
+            {
+                Email = request.Email,
+                Password = request.Password,
+            };
+
+            var result = await _mediator.Send(command);
+
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
+
         /// <summary>
         /// Cria um novo usuário.
         /// </summary>
         /// <param name="request">Dados do usuário para criação.</param>
         /// <returns>Usuário criado com sucesso.</returns>
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
         {
