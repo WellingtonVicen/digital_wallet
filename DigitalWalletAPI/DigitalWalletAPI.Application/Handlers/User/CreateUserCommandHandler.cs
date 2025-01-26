@@ -1,11 +1,12 @@
-﻿using DigitalWalletAPI.Application.DTOs.User;
+﻿using DigitalWalletAPI.Application.Commands.User;
+using DigitalWalletAPI.Application.DTOs.User;
 using DigitalWalletAPI.Application.Interfaces.Hasher;
 using DigitalWalletAPI.Application.Interfaces.Repositories.Application.Interfaces.Repositories;
 using DigitalWalletAPI.Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace DigitalWalletAPI.Application.Commands.User
+namespace DigitalWalletAPI.Application.Handlers.User
 {
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserResponse>
     {
@@ -33,7 +34,7 @@ namespace DigitalWalletAPI.Application.Commands.User
             }
 
             // Criando a entidade User
-            var newUser = new DigitalWalletAPI.Domain.Entities.User(request.Name, request.Email, _passwordHasher.HashPassword(request.Password));
+            var newUser = new Domain.Entities.User(request.Name, request.Email, _passwordHasher.HashPassword(request.Password));
 
             try
             {

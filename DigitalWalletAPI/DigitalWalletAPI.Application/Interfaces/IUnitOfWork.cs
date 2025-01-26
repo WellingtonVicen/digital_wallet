@@ -1,7 +1,10 @@
-﻿namespace DigitalWalletAPI.Application.Interfaces
+﻿using Microsoft.EntityFrameworkCore.Storage;
+
+namespace DigitalWalletAPI.Application.Interfaces
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
-        Task CommitAsync();
+        Task CommitAsync(CancellationToken cancellationToken);
+        Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
     }
 }

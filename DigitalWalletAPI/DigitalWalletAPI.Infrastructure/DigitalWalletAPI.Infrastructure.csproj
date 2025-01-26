@@ -27,4 +27,8 @@
     <ProjectReference Include="..\DigitalWalletAPI.Domain\DigitalWalletAPI.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

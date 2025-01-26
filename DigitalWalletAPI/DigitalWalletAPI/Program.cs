@@ -24,26 +24,29 @@ builder.Services.AddRepositories();
 builder.Services.AddCommands();
 builder.Services.AddApplicationServices();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    var jwtSettings = builder.Configuration.GetSection("Jwt");
+#region Jwt
 
-    options.TokenValidationParameters = new TokenValidationParameters
+var secretKey = configuration["Jwt:Key"];
+
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = true;
+    x.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"], // Obtém o valor do appsettings.json
-        ValidAudience = jwtSettings["Audience"], // Obtém o valor do appsettings.json
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])) // Obtém a chave secreta
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
+        ValidateIssuer = false,
+        ValidateAudience = false
     };
 });
+
+#endregion
 
 builder.Services.AddAuthorization();
 
@@ -55,26 +58,26 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Insira o token JWT no formato: Bearer {seu token}"
+        Description = "Insira o token JWT no campo: **Bearer {seu_token}**"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+           {
+             new OpenApiSecurityScheme
+             {
+                 Reference = new OpenApiReference
+                 {
+                     Type = ReferenceType.SecurityScheme,
+                     Id = "Bearer"
+                 }
+             },
+             Array.Empty<string>()
+           }
     });
 });
 

@@ -2,13 +2,14 @@
 {
     public class User
     {
-        public int Id { get; private set; }
+        public long Id { get; private set; }
         public string Name { get; private set; }
         public string Email { get; private set; }
         public string PasswordHash { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public ICollection<Wallet> Wallets { get; set; } = [];
 
-        private User() { } // Construtor para frameworks de persistência
+        public User() { }
 
         public User(string name, string email, string passwordHash)
         {

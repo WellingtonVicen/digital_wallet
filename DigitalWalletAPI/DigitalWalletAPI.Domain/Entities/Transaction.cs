@@ -2,9 +2,9 @@
 {
     public class Transaction
     {
-        public int Id { get; private set; }
-        public int? FromWalletId { get; private set; }
-        public int ToWalletId { get; private set; }
+        public long Id { get; private set; }
+        public long? FromWalletId { get; private set; }
+        public long ToWalletId { get; private set; }
         public decimal Amount { get; private set; }
         public string Type { get; private set; }
         public string Description { get; private set; }

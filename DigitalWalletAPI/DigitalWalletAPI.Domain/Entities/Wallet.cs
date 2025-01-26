@@ -3,22 +3,17 @@ namespace DigitalWalletAPI.Domain.Entities
 {
     public class Wallet
     {
-        public int Id { get; private set; }
-        public int UserId { get; private set; }
-        public decimal Balance { get; private set; }
-        public string Currency { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public long Id { get; set; }
+        public decimal Balance { get; set; }
+        public long UserId { get; set; }
+        public User User { get; set; }
 
-        public User User { get; private set; }
+        public Wallet() { }
 
-        private Wallet() { } // Construtor para frameworks de persistência
-
-        public Wallet(int userId, string currency, decimal initialBalance = 0)
+        public Wallet(long userId, decimal initialBalance = 0)
         {
             UserId = userId;
-            Currency = !string.IsNullOrWhiteSpace(currency) ? currency : throw new ArgumentException("Currency cannot be empty.");
             Balance = initialBalance >= 0 ? initialBalance : throw new ArgumentException("Initial balance cannot be negative.");
-            CreatedAt = DateTime.UtcNow;
         }
 
         public void AddBalance(decimal amount)

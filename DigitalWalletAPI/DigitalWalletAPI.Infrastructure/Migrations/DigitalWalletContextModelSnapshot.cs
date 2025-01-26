@@ -24,11 +24,11 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
 
             modelBuilder.Entity("DigitalWalletAPI.Domain.Entities.Transaction", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -40,11 +40,11 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("FromWalletId")
-                        .HasColumnType("integer");
+                    b.Property<long?>("FromWalletId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("ToWalletId")
-                        .HasColumnType("integer");
+                    b.Property<long>("ToWalletId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -61,23 +61,24 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
 
             modelBuilder.Entity("DigitalWalletAPI.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -93,33 +94,21 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
 
             modelBuilder.Entity("DigitalWalletAPI.Domain.Entities.Wallet", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId1")
-                        .HasColumnType("integer");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("wallets", (string)null);
                 });
@@ -144,19 +133,18 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
 
             modelBuilder.Entity("DigitalWalletAPI.Domain.Entities.Wallet", b =>
                 {
-                    b.HasOne("DigitalWalletAPI.Domain.Entities.User", null)
-                        .WithMany()
+                    b.HasOne("DigitalWalletAPI.Domain.Entities.User", "User")
+                        .WithMany("Wallets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DigitalWalletAPI.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DigitalWalletAPI.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Wallets");
                 });
 #pragma warning restore 612, 618
         }

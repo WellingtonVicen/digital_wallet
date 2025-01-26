@@ -20,7 +20,7 @@ namespace DigitalWalletAPI.Infrastructure.Repositories
         public async Task AddAsync(User user, CancellationToken cancellationToken)
         {
             await _context.Users.AddAsync(user, cancellationToken);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(cancellationToken);
         }
 
         public async Task<User?> GetByEmailAsync(string? email, CancellationToken cancellationToken)

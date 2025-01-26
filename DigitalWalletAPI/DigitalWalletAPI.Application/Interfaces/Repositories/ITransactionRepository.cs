@@ -6,8 +6,8 @@ namespace DigitalWalletAPI.Application.Interfaces.Repositories
     {
         public interface ITransactionRepository
         {
-            void Add(Transaction transaction);
-            List<Transaction> GetTransactionsByUserId(int userId, DateTime? startDate = null, DateTime? endDate = null);
+            Task AddAsync(Domain.Entities.Transaction transaction, CancellationToken cancellationToken);
+            Task<List<Domain.Entities.Transaction>> GetTransactionsByUserIdAsync(long userId, DateTime? startDate = null, DateTime? endDate = null, CancellationToken cancellationToken = default);
         }
     }
 }

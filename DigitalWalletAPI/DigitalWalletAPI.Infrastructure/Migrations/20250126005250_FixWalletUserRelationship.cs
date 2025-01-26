@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DigitalWalletAPI.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class FixWalletUserRelationship : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,10 +16,10 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
                 name: "users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -32,13 +32,10 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
                 name: "wallets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
                     Balance = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UserId1 = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,22 +46,16 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
                         principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_wallets_users_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "transactions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FromWalletId = table.Column<int>(type: "integer", nullable: true),
-                    ToWalletId = table.Column<int>(type: "integer", nullable: false),
+                    FromWalletId = table.Column<long>(type: "bigint", nullable: true),
+                    ToWalletId = table.Column<long>(type: "bigint", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
@@ -107,11 +98,6 @@ namespace DigitalWalletAPI.Infrastructure.Migrations
                 name: "IX_wallets_UserId",
                 table: "wallets",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_wallets_UserId1",
-                table: "wallets",
-                column: "UserId1");
         }
 
         /// <inheritdoc />

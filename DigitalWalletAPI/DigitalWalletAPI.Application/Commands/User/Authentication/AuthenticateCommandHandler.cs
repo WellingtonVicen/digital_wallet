@@ -1,6 +1,7 @@
 ﻿using DigitalWalletAPI.Application.DTOs.User.Authentication;
 using DigitalWalletAPI.Application.Interfaces.Hasher;
 using DigitalWalletAPI.Application.Interfaces.Repositories.Application.Interfaces.Repositories;
+using DigitalWalletAPI.Application.Interfaces.Token;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -33,22 +34,17 @@ namespace DigitalWalletAPI.Application.Commands.User.Authentication
             var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
             if (user is null || !_passwordHasher.VerifyPassword(user.PasswordHash, request.Password))
             {
-                return new AuthenticationResponse { HttpStatusCode = System.Net.HttpStatusCode.Unauthorized };
+                return new AuthenticationResponse();
             }
 
             // Gera o token JWT
-            var token = GenerateJwtToken(user.Id, user.Email);
-
             return new AuthenticationResponse
             {
-                HttpStatusCode = System.Net.HttpStatusCode.OK,
-                UserResponse = new DTOs.User.UserResponse
+                Data = new
                 {
-                    Id = user.Id,
-                    Email = user.Email,
-                    Name = user.Name
-                },
-                Token = token,
+                    Token = GenerateToken(),
+                    TokenExpires = DateTime.UtcNow.AddHours(int.Parse(_configuration["Jwt:HoursToExpire"]!))
+                }
             };
         }
 
@@ -56,27 +52,26 @@ namespace DigitalWalletAPI.Application.Commands.User.Authentication
         //summary>
         /// Gera um token JWT para o usuário autenticado.
         /// </summary>
-        private string GenerateJwtToken(long userId, string email)
+        private string GenerateToken()
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            // Recupera a chave com 256 bits a partir da configuração
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]);
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] {
-            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        }),
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
+                Subject = new ClaimsIdentity(
+                [
+                    new Claim(ClaimTypes.Name, _configuration["Jwt:Login"]!),
+                    new Claim(ClaimTypes.Role, "User")
+                ]),
+                Expires = DateTime.UtcNow.AddHours(int.Parse(_configuration["Jwt:HoursToExpire"]!)),
+
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
+
             return tokenHandler.WriteToken(token);
         }
     }
