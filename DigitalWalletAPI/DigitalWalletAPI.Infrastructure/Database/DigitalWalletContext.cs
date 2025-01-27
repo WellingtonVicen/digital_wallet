@@ -9,7 +9,6 @@ namespace DigitalWalletAPI.Infrastructure.Database
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<User> Users { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         {
             base.OnModelCreating(modelBuilder);

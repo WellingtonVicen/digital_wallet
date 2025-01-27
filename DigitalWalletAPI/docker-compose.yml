@@ -1,0 +1,65 @@
+services:
+  digitalwalletapi:
+    build:
+      context: .
+      dockerfile: DigitalWalletAPI/Dockerfile
+    container_name: digitalwalletapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=anNqZnZ3dXc3dHI3cjcyN3I3MnJ1NzlyOTg3OGU4MjYxMTYyaGNkamZza8On
+      - Jwt__Login=ManagerWell
+      - Jwt__Password=Porps12
+      - Jwt__HoursToExpire=1
+      - ConnectionStrings__PostgresConnection=Server=postgres;Port=5432;Database=digitalwalletdbhomolog;User Id=digitalwallet_user;Password=digital@12;
+      - ASPNETCORE_HTTPS_PORT=8081 
+      - ASPNETCORE_HTTP_PORT=8080 
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - postgres
+    command: >
+      bash -c "while ! pg_isready -h postgres -p 5432; do sleep 2; done; 
+      dotnet ef database update --project /app/DigitalWalletAPI.csproj && 
+      dotnet DigitalWalletAPI.dll"  # Executa as migrations e depois a API
+    networks:
+      - digitalwalletnet
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:13
+    container_name: PostgreSQL
+    environment:
+      POSTGRES_USER: digitalwallet_user
+      POSTGRES_PASSWORD: digital@12
+      POSTGRES_DB: digitalwalletdbhomolog
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - "5432:5432"
+    networks:
+      - digitalwalletnet
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - digitalwalletnet
+    restart: unless-stopped
+
+networks:
+  digitalwalletnet:
+    driver: bridge
+
+volumes:
+  postgres-data:

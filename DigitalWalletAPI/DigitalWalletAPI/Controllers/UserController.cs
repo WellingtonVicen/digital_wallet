@@ -1,7 +1,6 @@
 ﻿using DigitalWalletAPI.Application.Commands.User;
 using DigitalWalletAPI.Application.DTOs.User;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalWalletAPI.Controllers
@@ -37,7 +36,13 @@ namespace DigitalWalletAPI.Controllers
             };
 
             var result = await _mediator.Send(command);
-            return StatusCode((int)result.StatusCode, result);
+
+            if (result is null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return Ok(result);
         }
     }
 }

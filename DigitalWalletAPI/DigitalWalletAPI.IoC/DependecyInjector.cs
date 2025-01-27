@@ -28,7 +28,18 @@ namespace DigitalWalletAPI.IoC
         public static IServiceCollection AddDatabaseContext(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<DigitalWalletContext>(options =>
-             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+             options.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
+           
+            // Aplicar migrações automaticamente
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<DigitalWalletContext>();
+                    context.Database.Migrate();
+                }
+            }
+
             return services;
         }
 
