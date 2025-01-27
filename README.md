@@ -61,46 +61,48 @@ O Digital Wallet API é uma aplicação de carteira digital projetada para geren
 5. **Popule o banco de dados**
 
    Utilize o script SQL abaixo para popular as tabelas do banco de dados com 50 registros:
-
-   ```sql
-   -- Gera dados realistas na tabela 'users'
-INSERT INTO "users" ("Name", "Email", "PasswordHash", "CreatedAt")
-SELECT 
-    first_names || ' ' || last_names AS Name, 
-    LOWER(first_names || '.' || last_names || '@example.com') AS Email,
-    crypt('Password123', gen_salt('bf')) AS PasswordHash, -- Substitua 'Password123' por senhas geradas
-    NOW() AS CreatedAt
-FROM (
+```sql
+DO $$ 
+BEGIN 
+    -- Popula a tabela 'users'
+    INSERT INTO "users" ("Name", "Email", "PasswordHash", "CreatedAt")
     SELECT 
-        unnest(ARRAY['John', 'Jane', 'Michael', 'Emily', 'Chris', 'Sarah', 'David', 'Laura', 'James', 'Emma']) AS first_names,
-        unnest(ARRAY['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin']) AS last_names
-) AS names
-LIMIT 50;
-
-   -- Popula a tabela 'Wallet'
-DO $$
-BEGIN
-    FOR i IN 1..10 LOOP
-INSERT INTO public.wallets(
-	"Id", "Balance", "UserId")
-        VALUES (i, (i % 50) + 1, i);
-    END LOOP;
+        first_names || ' ' || last_names AS Name,
+        LOWER(first_names || '.' || last_names || '@example.com') AS Email,
+        crypt('Password123', gen_salt('bf')) AS PasswordHash,
+        NOW() AS CreatedAt
+    FROM (
+        SELECT 
+            unnest(ARRAY['John', 'Jane', 'Michael', 'Emily', 'Chris', 'Sarah', 'David', 'Laura', 'James', 'Emma']) AS first_names,
+            unnest(ARRAY['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin']) AS last_names
+    ) AS names 
+    LIMIT 50;
 END $$;
 
-   DO $$
-BEGIN
-    FOR i IN 1..10 LOOP
-        INSERT INTO "transactions" (id, wallet_id, amount, transaction_type, created_at)
+-- Popula a tabela 'wallets'
+    FOR i IN 1..50 LOOP
+        INSERT INTO "wallets" ("Id", "Balance", "UserId", "CreatedAt")
+        VALUES (
+            i, 
+            round(random() * 10000, 2), 
+            i, 
+            NOW()
+        );
+    END LOOP;
+
+    -- Popula a tabela 'transactions'
+    FOR i IN 1..50 LOOP
+        INSERT INTO "transactions" ("Id", "WalletId", "Amount", "TransactionType", "CreatedAt")
         VALUES (
             i,
-            (i % 10) + 1,
+            (i % 50) + 1,
             round(random() * 1000, 2),
             CASE WHEN random() > 0.5 THEN 'Credit' ELSE 'Debit' END,
             NOW()
         );
     END LOOP;
-END $$;;
-   ```
+END $$;
+```    
 
    Você pode executar este script diretamente no pgAdmin ou utilizando qualquer ferramenta de SQL conectada ao banco PostgreSQL.
 
