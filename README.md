@@ -63,19 +63,43 @@ O Digital Wallet API é uma aplicação de carteira digital projetada para geren
    Utilize o script SQL abaixo para popular as tabelas do banco de dados com 50 registros:
 
    ```sql
-   INSERT INTO "Users" ("Name", "Email", "PasswordHash")
-   SELECT md5(random()::text), md5(random()::text) || '@example.com', md5(random()::text)
-   FROM generate_series(1, 50);
+   -- Gera dados realistas na tabela 'users'
+INSERT INTO "users" ("Name", "Email", "PasswordHash", "CreatedAt")
+SELECT 
+    first_names || ' ' || last_names AS Name, 
+    LOWER(first_names || '.' || last_names || '@example.com') AS Email,
+    crypt('Password123', gen_salt('bf')) AS PasswordHash, -- Substitua 'Password123' por senhas geradas
+    NOW() AS CreatedAt
+FROM (
+    SELECT 
+        unnest(ARRAY['John', 'Jane', 'Michael', 'Emily', 'Chris', 'Sarah', 'David', 'Laura', 'James', 'Emma']) AS first_names,
+        unnest(ARRAY['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin']) AS last_names
+) AS names
+LIMIT 50;
 
-   INSERT INTO "Wallets" ("UserId", "Balance")
-   SELECT "Id", round(random() * 10000, 2)
-   FROM "Users"
-   LIMIT 50;
+   -- Popula a tabela 'Wallet'
+DO $$
+BEGIN
+    FOR i IN 1..10 LOOP
+INSERT INTO public.wallets(
+	"Id", "Balance", "UserId")
+        VALUES (i, (i % 50) + 1, i);
+    END LOOP;
+END $$;
 
-   INSERT INTO "Transactions" ("WalletId", "Amount", "Timestamp")
-   SELECT "Id", round(random() * 1000 - 500, 2), NOW()
-   FROM "Wallets"
-   LIMIT 50;
+   DO $$
+BEGIN
+    FOR i IN 1..10 LOOP
+        INSERT INTO "transactions" (id, wallet_id, amount, transaction_type, created_at)
+        VALUES (
+            i,
+            (i % 10) + 1,
+            round(random() * 1000, 2),
+            CASE WHEN random() > 0.5 THEN 'Credit' ELSE 'Debit' END,
+            NOW()
+        );
+    END LOOP;
+END $$;;
    ```
 
    Você pode executar este script diretamente no pgAdmin ou utilizando qualquer ferramenta de SQL conectada ao banco PostgreSQL.
