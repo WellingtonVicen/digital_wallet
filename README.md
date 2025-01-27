@@ -80,27 +80,36 @@ BEGIN
 END $$;
 
 -- Popula a tabela 'wallets'
-    FOR i IN 1..50 LOOP
-        INSERT INTO "wallets" ("Id", "Balance", "UserId", "CreatedAt")
+DO $$ 
+BEGIN
+    FOR i IN 1..10 LOOP
+        INSERT INTO "wallets" ("Id", "Balance", "UserId")
         VALUES (
             i, 
-            round(random() * 10000, 2), 
-            i, 
-            NOW()
+            random() * 10000::numeric,  -- Converte o valor para numeric e arredonda com 2 casas decimais
+            i -- Usa o valor de 'i' como 'UserId'
         );
     END LOOP;
+END $$;
 
-    -- Popula a tabela 'transactions'
+   -- Popula a tabela 'transactions'
+DO $$ 
+BEGIN
     FOR i IN 1..50 LOOP
-        INSERT INTO "transactions" ("Id", "WalletId", "Amount", "TransactionType", "CreatedAt")
+       INSERT INTO public.transactions(
+	"Id", "FromWalletId", "ToWalletId", "Amount", "Type", "Description", "CreatedAt")
         VALUES (
             i,
-            (i % 50) + 1,
-            round(random() * 1000, 2),
-            CASE WHEN random() > 0.5 THEN 'Credit' ELSE 'Debit' END,
-            NOW()
+            (i % 50) + 1, 
+			 (i % 50) + 1,  
+            random() * 1000::numeric,  -- Converte para 'numeric' e arredonda com 2 casas decimais
+             'Credit',  -- Determina o tipo de transação
+			 'TESTE',
+            NOW()  
         );
     END LOOP;
+END $$;
+
 END $$;
 ```    
 
