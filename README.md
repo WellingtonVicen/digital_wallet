@@ -39,7 +39,7 @@ O Digital Wallet API é uma aplicação de carteira digital projetada para geren
 1. **Clone o repositório**
    ```bash
    git clone <URL_DO_REPOSITORIO>
-   cd digital-wallet
+   cd digital_wallet
    ```
 
 2. **Configuração do Docker**
