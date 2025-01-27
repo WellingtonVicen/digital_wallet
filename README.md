@@ -1,90 +1,95 @@
 # Digital Wallet API
 
-## Descrição Geral
+## Visão Geral do Projeto
 
-O **Digital Wallet API** é uma aplicação desenvolvida em **.NET 8** que fornece uma solução completa para o gerenciamento de carteiras digitais. A API permite o cadastro de usuários, criação e manipulação de carteiras, bem como a execução de transações financeiras, como créditos e débitos.
+O Digital Wallet API é uma aplicação de carteira digital projetada para gerenciar contas de usuários, realizar transferências financeiras e manter um histórico de transações. O projeto é desenvolvido utilizando .NET 8.0 e segue os princípios de arquitetura limpa (Clean Architecture), incluindo práticas de CQRS e SOLID.
+
+### Funcionalidades Principais
+
+- Gerenciamento de usuários e carteiras.
+- Realização de transferências financeiras entre usuários.
+- Consulta de transações com filtros opcionais.
+
+## Tecnologias Utilizadas
+
+- **.NET 8.0**
+- **Entity Framework Core** para interações com o banco de dados.
+- **PostgreSQL** como banco de dados relacional.
+- **Docker** para conteinerização.
+- **MediatR** para implementação do padrão CQRS.
 
 ## Estrutura do Projeto
 
-### Principais Componentes
+- **API**: Controladores para expor endpoints REST.
+- **Application**: Contém casos de uso, validações e lógica de aplicação.
+- **Domain**: Regras de negócio e entidades principais.
+- **Infrastructure**: Configuração de banco de dados e repositórios.
 
-1. **Arquitetura:** O projeto segue uma arquitetura modular com as seguintes camadas:
-   - **Domain:** Define as entidades e as regras de negócio.
-   - **Application:** Contém os casos de uso e a lógica de aplicação.
-   - **Infrastructure:** Gerencia a comunicação com o banco de dados e outros recursos externos.
-   - **IoC (Inversion of Control):** Configurações para injeção de dependências.
+---
 
-2. **Banco de Dados:**
-   - Utiliza **PostgreSQL** para persistência.
-   - Inclui tabelas como `User`, `Wallet` e `Transaction` para organizar os dados do sistema.
+## Como Executar o Projeto
 
-3. **Docker:**
-   - Contém um **Dockerfile** e um arquivo **docker-compose** para a orquestração dos contêineres.
-   - Configurações incluem substituição de portas padrão para evitar conflitos.
-   - Inclui serviços para a API e o banco PostgreSQL.
+### Pré-requisitos
 
-4. **Funcionalidades:**
-   - Cadastro e gerenciamento de usuários.
-   - Criação e consulta de carteiras com saldo.
-   - Execução de transações financeiras associadas às carteiras (créditos e débitos).
+1. **Docker** e **Docker Compose** instalados.
+2. **Visual Studio 2022** (ou IDE equivalente com suporte a .NET 8.0).
 
-5. **Script de População:**
-   - Um script SQL é disponibilizado para popular o banco de dados com 50 registros fictícios em cada tabela, facilitando os testes e demonstrações.
+### Passo a Passo
 
-## Tecnologias Utilizadas
-- .NET 8
-- PostgreSQL
-- Docker/Docker Compose
-- Entity Framework Core
-- MediatR (para implementação de padrão CQRS)
+1. **Clone o repositório**
+   ```bash
+   git clone <URL_DO_REPOSITORIO>
+   cd digital-wallet
+   ```
 
-## Estrutura de Diretórios
+2. **Configuração do Docker**
+   Certifique-se de que os arquivos `Dockerfile` e `docker-compose.yml` estejam no diretório raiz do projeto.
 
-```
-DigitalWalletAPI/
-├── Application/               # Camada de Aplicação (Casos de Uso)
-├── Domain/                    # Núcleo do Domínio
-├── Infrastructure/            # Implementação de Infraestrutura
-├── IoC/                       # Configuração de Injeção de Dependência
-├── API/                       # Controllers e Entrada da API
-├── Tests/                     # Testes Unitários e de Integração
-├── docker-compose.yml         # Configuração do Docker Compose
-└── Dockerfile                 # Configuração de imagem Docker
-```
-
-## Configuração do Docker
-
-O **docker-compose.yml** define dois serviços principais:
-
-- **API:** Responsável por executar a aplicação.
-- **Database:** Um contêiner PostgreSQL configurado com o banco `digital_wallet`.
-
-### Comandos Principais
-
-1. Build e inicialização dos contêineres:
+3. **Suba os contêineres**
    ```bash
    docker-compose up --build
    ```
 
-2. Parar os contêineres:
-   ```bash
-   docker-compose down
+4. **Acesse os serviços**
+   - API: `http://localhost:8080`
+   - Swagger: `http://localhost:8080/swagger`
+   - pgAdmin: `http://localhost:5050`
+     - Login: `admin@admin.com`
+     - Senha: `admin`
+     - Host: `database`
+
+5. **Popule o banco de dados**
+
+   Utilize o script SQL abaixo para popular as tabelas do banco de dados com 50 registros:
+
+   ```sql
+   INSERT INTO "Users" ("Name", "Email", "PasswordHash")
+   SELECT md5(random()::text), md5(random()::text) || '@example.com', md5(random()::text)
+   FROM generate_series(1, 50);
+
+   INSERT INTO "Wallets" ("UserId", "Balance")
+   SELECT "Id", round(random() * 10000, 2)
+   FROM "Users"
+   LIMIT 50;
+
+   INSERT INTO "Transactions" ("WalletId", "Amount", "Timestamp")
+   SELECT "Id", round(random() * 1000 - 500, 2), NOW()
+   FROM "Wallets"
+   LIMIT 50;
    ```
 
-## Endpoints Principais
+   Você pode executar este script diretamente no pgAdmin ou utilizando qualquer ferramenta de SQL conectada ao banco PostgreSQL.
 
-- **Usuários:**
-  - `POST /users` - Criação de usuário.
-  - `GET /users/{id}` - Consulta de usuário por ID.
+6. **Testando a API**
 
-- **Carteiras:**
-  - `POST /wallets` - Criação de carteira.
-  - `GET /wallets/{id}` - Consulta de carteira por ID.
+   Exemplos de endpoints disponíveis:
 
-- **Transações:**
-  - `POST /transactions` - Realiza uma transação (crédito ou débito).
-  - `GET /transactions` - Lista transações filtradas por período (opcional).
+   - **Criar Usuário**: `POST /api/users`
+   - **Criar Carteira**: `POST /api/wallets`
+   - **Transferências**: `POST /api/transactions`
+   - **Listar Transações**: `GET /api/transactions?userId=<id>&startDate=<date>&endDate=<date>`
 
-## Observações Finais
-Este projeto tem como objetivo fornecer uma base escalável e bem estruturada para aplicações financeiras, permitindo expansões futuras como relatórios ou integração com sistemas externos.
+   Utilize ferramentas como Postman ou Swagger (disponível em `http://localhost:8080/swagger`) para interagir com a API.
+
+---
 
