@@ -60,7 +60,7 @@ O Digital Wallet API é uma aplicação de carteira digital projetada para geren
 
 5. **Popule o banco de dados**
 
-   Utilize o script SQL abaixo para popular as tabelas do banco de dados com 50 registros:
+   Utilize o script SQL abaixo para popular as tabelas do banco de dados com 10 registros:
 ```sql
 DO $$ 
 BEGIN 
@@ -95,13 +95,13 @@ END $$;
    -- Popula a tabela 'transactions'
 DO $$ 
 BEGIN
-    FOR i IN 1..50 LOOP
+    FOR i IN 1..10 LOOP
        INSERT INTO public.transactions(
 	"Id", "FromWalletId", "ToWalletId", "Amount", "Type", "Description", "CreatedAt")
         VALUES (
             i,
-            (i % 50) + 1, 
-			 (i % 50) + 1,  
+            (i % 10) + 1, 
+			 (i % 10) + 1,  
             random() * 1000::numeric,  -- Converte para 'numeric' e arredonda com 2 casas decimais
              'Credit',  -- Determina o tipo de transação
 			 'TESTE',
